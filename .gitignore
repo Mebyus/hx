@@ -1,2 +1,5 @@
 /.vscode/
 hx
+
+*.hx
+*.bin
