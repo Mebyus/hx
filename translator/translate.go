@@ -27,7 +27,7 @@ func (t *Translator) Translate() (code []byte, err error) {
 		case token.EOF:
 			return t.code, nil
 		case token.Illegal:
-			return nil, fmt.Errorf("illegal token: " + t.tok.String())
+			return nil, fmt.Errorf("illegal token " + t.tok.String())
 		case token.LineComment:
 			// skip comment
 		case token.HexInteger:
@@ -53,7 +53,7 @@ func (t *Translator) translateHexInteger() (err error) {
 	if err != nil {
 		return ErrBadByteFormat
 	}
-	if v >= 256 {
+	if v >= 1<<8 {
 		return ErrOutOfByteRange
 	}
 	t.code = append(t.code, byte(v))

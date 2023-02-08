@@ -3,14 +3,14 @@ package scanner
 const (
 	eof      = -1
 	prefetch = 2
-	nonASCII = 128
+	nonASCII = 1 << 7
 )
 
 func (s *Scanner) advance() {
 	if s.c != eof {
 		if s.c == '\n' {
 			s.pos.NextLine()
-		} else {
+		} else if s.c < nonASCII {
 			s.pos.NextCol()
 		}
 	}

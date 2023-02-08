@@ -3,14 +3,15 @@ package token
 import "fmt"
 
 type Token struct {
-	Kind Kind
-	Pos  Pos
+	Pos Pos
 
 	// Not empty only for tokens which can have
 	// arbitrary literal
 	//
 	// Examples: numbers or strings
 	Lit string
+
+	Kind Kind
 }
 
 func (tok *Token) String() string {
