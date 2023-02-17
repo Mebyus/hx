@@ -41,8 +41,11 @@ Hex number represents a single byte (number must be 2 digits exactly)
 01 A3 34
 00
 
+// Bytes in hx program can be written in lowercase
+bc 0a f3
+
 // This program results in a 4 bytes long file containing sequence:
-// 01 A3 34 00
+// 01 A3 34 00 BC 0A F3
 ```
 
 Binary number with exactly 8 digits can be used instead of hex
@@ -103,6 +106,7 @@ Strings support a small set of C-style escape sequence
 
 // \t = tab
 // \" = " (double quote character)
+// \\ = \
 
 "double quote character \" can be placed inside string"
 ```
@@ -125,14 +129,14 @@ literals converted to 2's complement form before translation
 0t45107
 
 // Literal can also be placed via explicit literal syntax
-lit(45107)
+{45107}
 
-// By default explicit literal argument is decimal number
+// By default explicit literal argument is a decimal number
 
 // Explicit literal can take additional translation options
-lit(45107, LE)
-lit(45107, 8)
-lit(45107, BE, 4)
+{45107, LE}
+{45107, 8}
+{45107, BE, 4}
 ```
 
 ### Labels
@@ -145,17 +149,17 @@ Two special labels are available (their explicit usage will result in error):
 * `start` - marks output stream start
 * `end` - marks output stream end
 
-Construct `len[label_b : label_a]` can be used to emit difference in `label_b` and `label_a` offsets. In other words it emits
+Construct `[label_b : label_a]` can be used to emit difference in `label_b` and `label_a` offsets. In other words it emits
 value equal to number of bytes in output stream between `label_a` and `label_b` in that particular order, assuming `label_b` comes after
 `label_a`. Incorrect order will result in error. Such construct is called *length*.
 
 Three special forms of length construct can be used:
 
-* `len[label:]` - difference between `label` and output stream start
-* `len[:label]` - difference betweem output stream end and `label`
-* `len[:]` - total number of bytes in output stream
+* `[label:]` - difference between `label` and output stream start
+* `[:label]` - difference betweem output stream end and `label`
+* `[:]` - total number of bytes in output stream
 
-> `len[label:]` is not the same as `@label` because directives could change `@start` value
+> `[label:]` is not the same as `@label` because directives could change `@start` value
 
 Label with a particular name can only be placed once inside a program, but can be referenced multiple times (or not used at all)
 
@@ -172,9 +176,9 @@ Declare constants:
 
 # n: lit = 45107
 # n: lit = -45107
-# n: lit(8) = 45107
-# n: lit(LE) = 45107
-# n: lit(LE, 8) = 45107
+# n: lit{8} = 45107
+# n: lit{LE} = 45107
+# n: lit{LE, 8} = 45107
 
 # s: str = "Hello, world!"
 ```

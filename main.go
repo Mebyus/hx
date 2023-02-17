@@ -1,10 +1,12 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"strings"
 
+	"codeberg.org/mebyus/hx/reverse"
 	"codeberg.org/mebyus/hx/translator"
 )
 
@@ -14,12 +16,12 @@ const (
 )
 
 func fatal(v interface{}) {
-	fmt.Println("fatal:", v)
+	fmt.Fprintln(os.Stderr, "fatal:", v)
 	os.Exit(1)
 }
 
 func fatalf(format string, v ...interface{}) {
-	fmt.Printf("fatal:"+format+"\n", v...)
+	fmt.Fprintf(os.Stderr, "fatal: "+format+"\n", v...)
 	os.Exit(1)
 }
 
@@ -28,10 +30,29 @@ func transformFilename(name string) string {
 }
 
 func main() {
-	if len(os.Args) < 2 {
-		fatal("specify file with hex codes to translate")
+	var isReverseCommand bool
+	flag.BoolVar(&isReverseCommand, "r", false, "transform binary file to text file in hx format")
+	flag.Parse()
+
+	args := flag.Args()
+	if len(args) == 0 {
+		fatal("filename was not specified")
 	}
-	filename := os.Args[1]
+	filename := args[0]
+
+	if isReverseCommand {
+		text, err := reverse.ReverseFile(filename)
+		if err != nil {
+			fatal(err)
+		}
+
+		outputFilename := filename + ext
+		err = os.WriteFile(outputFilename, text, 0o664)
+		if err != nil {
+			fatal(err)
+		}
+		return
+	}
 
 	code, err := translator.TranslateFile(filename)
 	if err != nil {
@@ -39,7 +60,7 @@ func main() {
 	}
 
 	outputFilename := transformFilename(filename)
-	err = os.WriteFile(outputFilename, code, 0664)
+	err = os.WriteFile(outputFilename, code, 0o664)
 	if err != nil {
 		fatal(err)
 	}

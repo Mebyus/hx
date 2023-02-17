@@ -8,11 +8,19 @@ import (
 	"codeberg.org/mebyus/hx/token"
 )
 
+type Scanner interface {
+	Scan() token.Token
+}
+
 type Translator struct {
 	code []byte
 
 	tok token.Token
-	sc  *scanner.Scanner
+	sc  Scanner
+}
+
+func FromScanner(sc Scanner) (t *Translator) {
+	return &Translator{sc: sc}
 }
 
 func FromBytes(b []byte) (t *Translator) {
