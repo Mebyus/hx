@@ -34,8 +34,12 @@ func (s *Scanner) collect() string {
 }
 
 func (s *Scanner) store() {
-	s.buf = append(s.buf, byte(s.c))
+	s.addbuf(byte(s.c))
 	s.advance()
+}
+
+func (s *Scanner) addbuf(b byte) {
+	s.buf = append(s.buf, b)
 }
 
 func (s *Scanner) skipWhitespace() {

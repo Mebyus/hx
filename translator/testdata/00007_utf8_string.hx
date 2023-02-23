@@ -1,0 +1,5 @@
+"Шмель"
+
+// TEST_RESULT
+
+D0 A8 D0 BC D0 B5 D0 BB D1 8C

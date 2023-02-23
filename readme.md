@@ -107,6 +107,7 @@ Strings support a small set of C-style escape sequence
 // \t = tab
 // \" = " (double quote character)
 // \\ = \
+// \r = carriage return
 
 "double quote character \" can be placed inside string"
 ```

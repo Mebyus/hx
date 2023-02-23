@@ -40,11 +40,40 @@ func (s *Scanner) scanString() (tok token.Token) {
 	tok.Pos = s.pos
 	s.store() // consume "
 
+	isIllegal := false
 	for s.c != eof && s.c != '"' {
-		s.store()
+		if s.c != '\\' {
+			s.store()
+			continue
+		}
+
+		// handle escape sequence
+		switch s.next {
+		case 'n':
+			s.addbuf('\n')
+		case 'r':
+			s.addbuf('\r')
+		case 't':
+			s.addbuf('\t')
+		case '"':
+			s.addbuf('"')
+		case '\\':
+			s.addbuf('\\')
+		case eof:
+			isIllegal = true
+			s.store()
+			continue
+		default:
+			isIllegal = true
+			s.store()
+			s.store()
+			continue
+		}
+		s.advance()
+		s.advance()
 	}
 
-	if s.c == eof {
+	if s.c == eof || isIllegal {
 		tok.Kind = token.Illegal
 	} else {
 		tok.Kind = token.String
