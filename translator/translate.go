@@ -27,10 +27,10 @@ func (t *Translator) Translate() (code []byte, err error) {
 		case token.EOF:
 			return t.code, nil
 		case token.Illegal:
-			return nil, fmt.Errorf("illegal token " + t.tok.String())
+			return nil, fmt.Errorf("illegal token " + t.tok.Compact())
 		case token.LineComment:
 			// skip comment
-		case token.HexInteger:
+		case token.HexByte:
 			err = t.translateHexInteger()
 		case token.String:
 			err = t.translateString()
@@ -39,7 +39,7 @@ func (t *Translator) Translate() (code []byte, err error) {
 		}
 
 		if err != nil {
-			return nil, fmt.Errorf("translate token [ %s ]: %v", t.tok.String(), err)
+			return nil, fmt.Errorf("translate token [ %s ]: %v", t.tok.Compact(), err)
 		}
 	}
 }

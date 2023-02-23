@@ -97,7 +97,7 @@ func (s *Scanner) scanHexadecimalNumber() (tok token.Token) {
 		return
 	}
 
-	tok.Kind = token.HexInteger
+	tok.Kind = token.HexByte
 	tok.Lit = s.collect()
 	return
 }

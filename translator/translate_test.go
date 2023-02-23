@@ -135,7 +135,7 @@ func translateScannerWithBytes(sc Scanner) (code []byte, err error) {
 			return code, nil
 		case token.LineComment:
 			// skip comment
-		case token.HexInteger:
+		case token.HexByte:
 			b, err := translateHexInteger(tok.Lit)
 			if err != nil {
 				return nil, fmt.Errorf("translate token ( %s ): %v", tok.String(), err)

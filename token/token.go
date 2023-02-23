@@ -20,3 +20,10 @@ func (tok *Token) String() string {
 	}
 	return fmt.Sprintf("%-12s%-12s%s", tok.Pos.String(), Literal[tok.Kind], tok.Lit)
 }
+
+func (tok *Token) Compact() string {
+	if tok.Kind.HasStaticLiteral() {
+		return fmt.Sprintf("%s  %s", tok.Pos.String(), Literal[tok.Kind])
+	}
+	return fmt.Sprintf("%s  %s  %s", tok.Pos.String(), Literal[tok.Kind], tok.Lit)
+}

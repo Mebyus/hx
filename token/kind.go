@@ -5,10 +5,18 @@ type Kind int
 const (
 	EOF Kind = iota
 
+	Colon      // :
+	LeftBrace  // {
+	RightBrace // }
+
 	noStaticLiteral
 
-	HexInteger  // A7
+	HexByte     // A7 (2 digits exactly)
+	BinaryByte  // 11010001 (8 digits exactly)
 	String      // "string literal"
+	Identifier  // some_label
+	Reference   // @some_label
+	Directive   // # opt some_option
 	LineComment // // it's a line comment
 	Illegal
 )
