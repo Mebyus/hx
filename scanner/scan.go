@@ -102,9 +102,81 @@ func (s *Scanner) scanHexadecimalNumber() (tok token.Token) {
 	return
 }
 
-func (s *Scanner) scanNumber() (tok token.Token) {
-	tok = s.scanHexadecimalNumber()
+func (s *Scanner) scanHexByte() (tok token.Token) {
+	tok.Pos = s.pos
+
+	for s.c != eof && isHexadecimalDigit(s.c) {
+		s.store()
+	}
+
+	if isAlphanum(s.c) {
+		s.storeWord()
+		tok.Kind = token.Illegal
+		tok.Lit = s.collect()
+		return
+	}
+
+	tok.Lit = s.collect()
+	if len(tok.Lit) != 2 {
+		tok.Kind = token.Illegal
+		return
+	}
+
+	tok.Kind = token.HexByte
+	tok.Val = uint64(hexDigitsToByteValue(int(tok.Lit[0]), int(tok.Lit[1])))
 	return
+}
+
+func (s *Scanner) scanBinaryByteAtPos(pos token.Pos) (tok token.Token) {
+	tok.Pos = pos
+	for s.c != eof && isBinaryDigit(s.c) {
+		s.store()
+	}
+
+	if isAlphanum(s.c) {
+		s.storeWord()
+		tok.Kind = token.Illegal
+		tok.Lit = s.collect()
+		return
+	}
+
+	tok.Lit = s.collect()
+	if len(tok.Lit) != 8 {
+		tok.Kind = token.Illegal
+		return
+	}
+
+	tok.Kind = token.BinaryByte
+	tok.Val = uint64(binaryDigitsToByte(tok.Lit))
+	return
+}
+
+func (s *Scanner) scanNumber() (tok token.Token) {
+	if !isBinaryDigit(s.c) {
+		tok = s.scanHexByte()
+		return
+	}
+	if !isBinaryDigit(s.next) {
+		tok = s.scanHexByte()
+		return
+	}
+
+	pos := s.pos
+	prev := s.c
+	s.store()
+	if isBinaryDigit(s.next) {
+		tok = s.scanBinaryByteAtPos(pos)
+		return
+	}
+	if isWhitespace(s.next) || s.next == eof {
+		tok.Val = uint64(hexDigitsToByteValue(prev, s.c))
+		s.store()
+		tok.Kind = token.HexByte
+		tok.Lit = s.collect()
+		tok.Pos = pos
+		return
+	}
+	return s.scanIllegalWordAtPos(pos)
 }
 
 func (s *Scanner) scanLineComment() (tok token.Token) {
@@ -126,6 +198,38 @@ func (s *Scanner) scanIllegalByteToken() token.Token {
 	return tok
 }
 
+func (s *Scanner) scanIllegalWord() (tok token.Token) {
+	tok = s.createToken(token.Illegal)
+	s.storeWord()
+	tok.Lit = s.collect()
+	return
+}
+
+func (s *Scanner) scanIllegalWordAtPos(pos token.Pos) (tok token.Token) {
+	tok = s.createToken(token.Illegal)
+	tok.Pos = pos
+	s.storeWord()
+	tok.Lit = s.collect()
+	return
+}
+
+func (s *Scanner) scanOneByteToken(kind token.Kind) token.Token {
+	tok := s.createToken(kind)
+	s.advance()
+	return tok
+}
+
 func (s *Scanner) scanOther() token.Token {
-	return s.scanIllegalByteToken()
+	switch s.c {
+	case ':':
+		return s.scanOneByteToken(token.Colon)
+	case '-':
+		return s.scanOneByteToken(token.Minus)
+	case '{':
+		return s.scanOneByteToken(token.LeftBrace)
+	case '}':
+		return s.scanOneByteToken(token.RightBrace)
+	default:
+		return s.scanIllegalByteToken()
+	}
 }

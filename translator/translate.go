@@ -2,7 +2,6 @@ package translator
 
 import (
 	"fmt"
-	"strconv"
 
 	"codeberg.org/mebyus/hx/token"
 )
@@ -30,10 +29,10 @@ func (t *Translator) Translate() (code []byte, err error) {
 			return nil, fmt.Errorf("illegal token " + t.tok.Compact())
 		case token.LineComment:
 			// skip comment
-		case token.HexByte:
-			err = t.translateHexInteger()
+		case token.HexByte, token.BinaryByte:
+			t.translateByte()
 		case token.String:
-			err = t.translateString()
+			t.translateString()
 		default:
 			panic("unknown token: " + t.tok.String())
 		}
@@ -44,23 +43,12 @@ func (t *Translator) Translate() (code []byte, err error) {
 	}
 }
 
-func (t *Translator) translateHexInteger() (err error) {
-	lit := t.tok.Lit
-	if len(lit) != 2 {
-		return ErrBadByteFormat
-	}
-	v, err := strconv.ParseUint(lit, 16, 64)
-	if err != nil {
-		return ErrBadByteFormat
-	}
-	if v >= 1<<8 {
-		return ErrOutOfByteRange
-	}
-	t.code = append(t.code, byte(v))
+func (t *Translator) translateByte() {
+	t.code = append(t.code, byte(t.tok.Val))
 	return
 }
 
-func (t *Translator) translateString() (err error) {
+func (t *Translator) translateString() {
 	lit := t.tok.Lit
 	if len(lit) < 2 {
 		panic("malformed string token: " + t.tok.String())

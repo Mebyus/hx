@@ -5,6 +5,7 @@ var Literal = [...]string{
 	EOF: "<EOF>",
 
 	Colon:      ":",
+	Minus:      "-",
 	LeftBrace:  "{",
 	RightBrace: "}",
 

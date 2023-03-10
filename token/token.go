@@ -11,6 +11,11 @@ type Token struct {
 	// Examples: numbers or strings
 	Lit string
 
+	// Meaning depends on Token.Kind
+	//
+	// Kind: HexByte or BinaryByte. Decoded byte value
+	Val uint64
+
 	Kind Kind
 }
 

@@ -6,6 +6,7 @@ const (
 	EOF Kind = iota
 
 	Colon      // :
+	Minus      // -
 	LeftBrace  // {
 	RightBrace // }
 
