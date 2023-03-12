@@ -184,6 +184,17 @@ Declare constants:
 # s: str = "Hello, world!"
 ```
 
+```
+// Constatns must be declared before usage
+# some_string: str = "Hello, world!"
+
+// Now an identifier $some_string will be substituted for "Hello, world!" in output stream
+$some_string
+
+// This program results in a 13 bytes long file containing sequence:
+// 48 65 6C 6C 6F 2C 20 77 6F 72 6C 64 21
+```
+
 Change translator options:
 
 ```

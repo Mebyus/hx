@@ -26,6 +26,18 @@ func (s *Scanner) Scan() token.Token {
 		return s.scanLineComment()
 	}
 
+	if s.c == '#' {
+		return s.scanDirective()
+	}
+
+	if s.c == '$' {
+		return s.scanIdentifier()
+	}
+
+	if s.c == '@' {
+		return s.scanReference()
+	}
+
 	return s.scanOther()
 }
 
@@ -34,6 +46,42 @@ func (s *Scanner) createToken(kind token.Kind) token.Token {
 		Kind: kind,
 		Pos:  s.pos,
 	}
+}
+
+func (s *Scanner) scanWordWithPrefix(kind token.Kind) (tok token.Token) {
+	tok.Pos = s.pos
+	s.store()
+
+	if !isAlphanum(s.next) {
+		tok.Kind = token.Illegal
+		tok.Lit = s.collect()
+		return
+	}
+
+	s.storeWord()
+	tok.Kind = kind
+	tok.Lit = s.collect()
+	return
+}
+
+func (s *Scanner) scanIdentifier() (tok token.Token) {
+	return s.scanWordWithPrefix(token.Identifier)
+}
+
+func (s *Scanner) scanReference() (tok token.Token) {
+	return s.scanWordWithPrefix(token.Reference)
+}
+
+func (s *Scanner) scanDirective() (tok token.Token) {
+	tok.Kind = token.Directive
+	tok.Pos = s.pos
+
+	for s.c != eof && s.c != '\n' {
+		s.store()
+	}
+
+	tok.Lit = s.collect()
+	return
 }
 
 func (s *Scanner) scanString() (tok token.Token) {
