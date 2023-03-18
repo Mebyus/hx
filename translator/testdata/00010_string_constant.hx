@@ -1,4 +1,4 @@
-// Constatns must be declared before usage
+// Constants must be declared before usage
 # some_string: str = "Hello, world!"
 
 // Now an identifier $some_string will be substituted for "Hello, world!" in output stream

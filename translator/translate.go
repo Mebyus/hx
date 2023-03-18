@@ -33,8 +33,23 @@ func (t *Translator) Translate() (code []byte, err error) {
 			t.translateByte()
 		case token.String:
 			t.translateString()
+		case token.Directive:
+			dir, err := ParseDirective(t.tok)
+			if err != nil {
+				return nil, fmt.Errorf("parse directive [ %s ]: %v", t.tok.Compact(), err)
+			}
+			err = dir.Apply(t)
+			if err != nil {
+				return nil, fmt.Errorf("apply directive [ %s ]: %v", t.tok.Compact(), err)
+			}
+		case token.Identifier:
+			name := t.tok.Lit[1:]
+			_, ok := t.cvs[name]
+			if !ok {
+				return nil, fmt.Errorf("identifier [ %s ] not defined", t.tok.Compact())
+			}
 		default:
-			panic("unknown token: " + t.tok.String())
+			panic("unknown token: " + t.tok.Compact())
 		}
 
 		if err != nil {
@@ -51,7 +66,7 @@ func (t *Translator) translateByte() {
 func (t *Translator) translateString() {
 	lit := t.tok.Lit
 	if len(lit) < 2 {
-		panic("malformed string token: " + t.tok.String())
+		panic("malformed string token: " + t.tok.Compact())
 	}
 	str := lit[1 : len(lit)-1]
 	t.code = append(t.code, []byte(str)...)

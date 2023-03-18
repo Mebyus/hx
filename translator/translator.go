@@ -15,16 +15,22 @@ type Scanner interface {
 type Translator struct {
 	code []byte
 
+	// const values mapped by name
+	cvs map[string]ConstValue
+
 	tok token.Token
 	sc  Scanner
 }
 
 func FromScanner(sc Scanner) (t *Translator) {
-	return &Translator{sc: sc}
+	return &Translator{
+		sc:  sc,
+		cvs: make(map[string]ConstValue),
+	}
 }
 
 func FromBytes(b []byte) (t *Translator) {
-	t = &Translator{sc: scanner.FromBytes(b)}
+	t = FromScanner(scanner.FromBytes(b))
 	return
 }
 
