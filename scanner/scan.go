@@ -30,11 +30,11 @@ func (s *Scanner) Scan() token.Token {
 		return s.scanDirective()
 	}
 
-	if s.c == '$' {
+	if s.c == '$' && s.next == '.' {
 		return s.scanIdentifier()
 	}
 
-	if s.c == '@' {
+	if s.c == '@' && s.next == '.' {
 		return s.scanReference()
 	}
 
@@ -50,6 +50,7 @@ func (s *Scanner) createToken(kind token.Kind) token.Token {
 
 func (s *Scanner) scanWordWithPrefix(kind token.Kind) (tok token.Token) {
 	tok.Pos = s.pos
+	s.store()
 	s.store()
 
 	if !isAlphanum(s.next) {

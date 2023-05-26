@@ -13,8 +13,8 @@ var Literal = [...]string{
 	BinaryByte:  "<BINBYTE>",
 	String:      "<STRING>",
 	Identifier:  "<IDENT>",
-	Reference:   "<REFNCE>",
-	Directive:   "<DIRTVE>",
+	Reference:   "<REFRNCE>",
+	Directive:   "<DIRCTVE>",
 	LineComment: "<LINECOM>",
 	Illegal:     "<ILLEGAL>",
 }

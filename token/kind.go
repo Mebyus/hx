@@ -15,8 +15,8 @@ const (
 	HexByte     // A7 (2 digits exactly)
 	BinaryByte  // 11010001 (8 digits exactly)
 	String      // "string literal"
-	Identifier  // $some_label
-	Reference   // @some_label
+	Identifier  // $.some_label
+	Reference   // @.some_label
 	Directive   // # opt some_option
 	LineComment // // it's a line comment
 	Illegal

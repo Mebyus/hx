@@ -16,7 +16,7 @@ type Translator struct {
 	code []byte
 
 	// const values mapped by name
-	cvs map[string]ConstValue
+	cvs map[string]string
 
 	tok token.Token
 	sc  Scanner
@@ -25,7 +25,7 @@ type Translator struct {
 func FromScanner(sc Scanner) (t *Translator) {
 	return &Translator{
 		sc:  sc,
-		cvs: make(map[string]ConstValue),
+		cvs: make(map[string]string),
 	}
 }
 

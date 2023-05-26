@@ -43,11 +43,12 @@ func (t *Translator) Translate() (code []byte, err error) {
 				return nil, fmt.Errorf("apply directive [ %s ]: %v", t.tok.Compact(), err)
 			}
 		case token.Identifier:
-			name := t.tok.Lit[1:]
-			_, ok := t.cvs[name]
+			name := t.tok.Lit[2:]
+			val, ok := t.cvs[name]
 			if !ok {
-				return nil, fmt.Errorf("identifier [ %s ] not defined", t.tok.Compact())
+				return nil, fmt.Errorf("identifier '%s' not defined", name)
 			}
+			t.code = append(t.code, []byte(val)...)
 		default:
 			panic("unknown token: " + t.tok.Compact())
 		}
@@ -60,7 +61,6 @@ func (t *Translator) Translate() (code []byte, err error) {
 
 func (t *Translator) translateByte() {
 	t.code = append(t.code, byte(t.tok.Val))
-	return
 }
 
 func (t *Translator) translateString() {
@@ -70,5 +70,4 @@ func (t *Translator) translateString() {
 	}
 	str := lit[1 : len(lit)-1]
 	t.code = append(t.code, []byte(str)...)
-	return
 }

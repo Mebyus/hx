@@ -143,7 +143,7 @@ literals converted to 2's complement form before translation
 ### Labels
 
 Construct `some_label:` marks address in output stream with label. Label itself does not produce any output.
-At any point in program construct `@some_label` can be used (referenced) to emit an address (offset in output stream) of that label.
+At any point in program construct `@.some_label` can be used (referenced) to emit an address (offset in output stream) of that label.
 
 Two special labels are available (their explicit usage will result in error):
 
@@ -160,7 +160,7 @@ Three special forms of length construct can be used:
 * `[:label]` - difference betweem output stream end and `label`
 * `[:]` - total number of bytes in output stream
 
-> `[label:]` is not the same as `@label` because directives could change `@start` value
+> `[label:]` is not the same as `@.label` because directives could change `@.start` value
 
 Label with a particular name can only be placed once inside a program, but can be referenced multiple times (or not used at all)
 
@@ -188,8 +188,8 @@ Declare constants:
 // Constants must be declared before usage
 # some_string: str = "Hello, world!"
 
-// Now an identifier $some_string will be substituted for "Hello, world!" in output stream
-$some_string
+// Now an identifier $.some_string will be substituted for "Hello, world!" in output stream
+$.some_string
 
 // This program results in a 13 bytes long file containing sequence:
 // 48 65 6C 6C 6F 2C 20 77 6F 72 6C 64 21
@@ -252,6 +252,7 @@ Include other binary file in output stream:
 ```
 
 Text above will be translated to binary with the following sequence of bytes
+
 ```
 10 01 A3 34 00 20 01 02
 ```
@@ -259,7 +260,8 @@ Text above will be translated to binary with the following sequence of bytes
 ## Usage
 
 Invoke with simple command
-```
+
+```sh
 hx my_text_file
 ```
 
@@ -271,30 +273,34 @@ This command will produce file `my_text_file.bin` in binary format. You can open
 need Go installed
 
 Build with command (assuming you are in repository's root directory)
-```
+
+```sh
 go build .
 ```
 
 Install it via go's install command (places executable in $GOPATH/bin)
-```
+
+```sh
 go install .
 ```
 
 There are also convenient make targets for build
-```
+
+```sh
 make
 ```
 
 And install
-```
+
+```sh
 make install
 ```
 
-# Reverse
+## Reverse
 
 Reverse command can translate binary file to text file. The resulting text file can be used
 as **hx** input to produce original binary file
 
-```
+```sh
 hx -r binary_file
 ```
