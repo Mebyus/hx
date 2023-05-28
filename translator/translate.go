@@ -48,7 +48,14 @@ func (t *Translator) Translate() (code []byte, err error) {
 			if !ok {
 				return nil, fmt.Errorf("identifier '%s' not defined", name)
 			}
-			t.code = append(t.code, []byte(val)...)
+			switch v := val.(type) {
+			case string:
+				t.code = append(t.code, []byte(v)...)
+			case []byte:
+				t.code = append(t.code, v...)
+			default:
+				panic("unexpected const value type: " + fmt.Sprintf("%v (%t)", v, v))
+			}
 		default:
 			panic("unknown token: " + t.tok.Compact())
 		}

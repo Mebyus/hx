@@ -15,8 +15,8 @@ type Scanner interface {
 type Translator struct {
 	code []byte
 
-	// const values mapped by name
-	cvs map[string]string
+	// string const values mapped by name
+	cvs map[string]any
 
 	tok token.Token
 	sc  Scanner
@@ -25,7 +25,7 @@ type Translator struct {
 func FromScanner(sc Scanner) (t *Translator) {
 	return &Translator{
 		sc:  sc,
-		cvs: make(map[string]string),
+		cvs: make(map[string]any),
 	}
 }
 
