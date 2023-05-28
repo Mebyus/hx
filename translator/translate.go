@@ -1,6 +1,7 @@
 package translator
 
 import (
+	"encoding/binary"
 	"fmt"
 
 	"codeberg.org/mebyus/hx/token"
@@ -22,6 +23,7 @@ func TranslateFile(filename string) (code []byte, err error) {
 func (t *Translator) Translate() (code []byte, err error) {
 	for {
 		t.tok = t.sc.Scan()
+
 		switch t.tok.Kind {
 		case token.EOF:
 			return t.code, nil
@@ -33,6 +35,34 @@ func (t *Translator) Translate() (code []byte, err error) {
 			t.translateByte()
 		case token.String:
 			t.translateString()
+		case token.Colon:
+			// skip colon
+			//
+			// in future need to check that colon is placed only after label
+		case token.Label:
+			name := t.tok.Lit
+			_, ok := t.labels[name]
+			if ok {
+				return nil, fmt.Errorf("redeclaration of label '%s' at %s", name, t.tok.Pos.String())
+			}
+			offset := uint64(len(t.code))
+			t.labels[name] = offset
+			for _, pos := range t.late[name] {
+				binary.LittleEndian.PutUint64(t.code[pos:], offset)
+			}
+			delete(t.late, name)
+		case token.Reference:
+			name := t.tok.Lit[2:]
+			offset, ok := t.labels[name]
+			if ok {
+				binary.LittleEndian.PutUint64(t.lbuf[:], offset)
+				t.code = append(t.code, t.lbuf[:]...)
+			} else {
+				t.late[name] = append(t.late[name], uint64(len(t.code)))
+
+				// temporary place zeroes instead of actual offset
+				t.code = append(t.code, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00)
+			}
 		case token.Directive:
 			dir, err := ParseDirective(t.tok)
 			if err != nil {
@@ -42,7 +72,7 @@ func (t *Translator) Translate() (code []byte, err error) {
 			if err != nil {
 				return nil, fmt.Errorf("apply directive [ %s ]: %v", t.tok.Compact(), err)
 			}
-		case token.Identifier:
+		case token.Placement:
 			name := t.tok.Lit[2:]
 			val, ok := t.cvs[name]
 			if !ok {

@@ -14,8 +14,19 @@ func (s *Scanner) Scan() token.Token {
 		return s.createToken(token.EOF)
 	}
 
-	if isHexadecimalDigit(s.c) {
+	if isDecimalDigit(s.c) {
 		return s.scanNumber()
+	}
+
+	if isHexadecimalDigit(s.c) {
+		if !isHexadecimalDigit(s.next) {
+			return s.scanLabel()
+		}
+		return s.scanNumber()
+	}
+
+	if isLetterOrUnderscore(s.c) {
+		return s.scanLabel()
 	}
 
 	if s.c == '"' {
@@ -31,7 +42,7 @@ func (s *Scanner) Scan() token.Token {
 	}
 
 	if s.c == '$' && s.next == '.' {
-		return s.scanIdentifier()
+		return s.scanPlacement()
 	}
 
 	if s.c == '@' && s.next == '.' {
@@ -65,8 +76,8 @@ func (s *Scanner) scanWordWithPrefix(kind token.Kind) (tok token.Token) {
 	return
 }
 
-func (s *Scanner) scanIdentifier() (tok token.Token) {
-	return s.scanWordWithPrefix(token.Identifier)
+func (s *Scanner) scanPlacement() (tok token.Token) {
+	return s.scanWordWithPrefix(token.Placement)
 }
 
 func (s *Scanner) scanReference() (tok token.Token) {
@@ -197,6 +208,14 @@ func (s *Scanner) scanBinaryByteAtPos(pos token.Pos) (tok token.Token) {
 
 	tok.Kind = token.BinaryByte
 	tok.Val = uint64(binaryDigitsToByte(tok.Lit))
+	return
+}
+
+func (s *Scanner) scanLabel() (tok token.Token) {
+	tok.Pos = s.pos
+	s.storeWord()
+	tok.Kind = token.Label
+	tok.Lit = s.collect()
 	return
 }
 

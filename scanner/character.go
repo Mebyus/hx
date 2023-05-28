@@ -1,19 +1,31 @@
 package scanner
 
-func isAlphanum(b int) bool {
-	return ('a' <= b && b <= 'z') || b == '_' || ('A' <= b && b <= 'Z') || ('0' <= b && b <= '9')
+func isAlphanum(c int) bool {
+	return isLetterOrUnderscore(c) || isDecimalDigit(c)
 }
 
-func isHexadecimalDigit(b int) bool {
-	return ('0' <= b && b <= '9') || ('a' <= b && b <= 'f') || ('A' <= b && b <= 'F')
+func isHexadecimalDigit(c int) bool {
+	return isDecimalDigit(c) || ('a' <= c && c <= 'f') || ('A' <= c && c <= 'F')
 }
 
-func isBinaryDigit(b int) bool {
-	return b == '0' || b == '1'
+func isBinaryDigit(c int) bool {
+	return c == '0' || c == '1'
 }
 
-func isWhitespace(b int) bool {
-	return b == ' ' || b == '\n' || b == '\t' || b == '\r'
+func isWhitespace(c int) bool {
+	return c == ' ' || c == '\n' || c == '\t' || c == '\r'
+}
+
+func isLetterOrUnderscore(c int) bool {
+	return isLetter(c) || c == '_'
+}
+
+func isLetter(c int) bool {
+	return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z')
+}
+
+func isDecimalDigit(c int) bool {
+	return '0' <= c && c <= '9'
 }
 
 func binaryDigitsToByte(s string) byte {

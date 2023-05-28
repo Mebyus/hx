@@ -18,14 +18,27 @@ type Translator struct {
 	// string const values mapped by name
 	cvs map[string]any
 
+	// label offsets mapped by name
+	labels map[string]uint64
+
+	// labels that are used, but not yet declared
+	//
+	// list of positions mapped by label name
+	late map[string][]uint64
+
+	// buffer for preparing reference value placement
+	lbuf [8]byte
+
 	tok token.Token
 	sc  Scanner
 }
 
 func FromScanner(sc Scanner) (t *Translator) {
 	return &Translator{
-		sc:  sc,
-		cvs: make(map[string]any),
+		sc:     sc,
+		cvs:    make(map[string]any),
+		labels: make(map[string]uint64),
+		late:   make(map[string][]uint64),
 	}
 }
 
