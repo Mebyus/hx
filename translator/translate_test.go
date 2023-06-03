@@ -136,18 +136,17 @@ func translateScannerWithBytes(sc Scanner) (code []byte, err error) {
 		case token.LineComment:
 			// skip comment
 		case token.HexByte:
-			b, err := translateHexInteger(tok.Lit)
-			if err != nil {
-				return nil, fmt.Errorf("translate token ( %s ): %v", tok.String(), err)
+			if tok.Val > 255 {
+				return nil, fmt.Errorf("translate token ( %s ): %v", tok.Compact(), ErrOutOfByteRange)
 			}
-			code = append(code, b)
+			code = append(code, byte(tok.Val))
 		default:
-			return nil, fmt.Errorf("unexpected token ( %s )", tok.String())
+			return nil, fmt.Errorf("unexpected token ( %s )", tok.Compact())
 		}
 	}
 }
 
-func translateHexInteger(lit string) (b byte, err error) {
+func parseHexByte(lit string) (b byte, err error) {
 	if len(lit) != 2 {
 		return 0, ErrBadByteFormat
 	}

@@ -3,7 +3,10 @@ package token
 type Kind int
 
 const (
-	EOF Kind = iota
+	// Zero value. Do not use explicitly
+	empty Kind = iota
+
+	EOF
 
 	Colon      // :
 	Minus      // -
@@ -15,7 +18,7 @@ const (
 	HexByte     // A7 (2 digits exactly)
 	BinaryByte  // 11010001 (8 digits exactly)
 	String      // "string literal"
-	Label       // label (must be followed by colon)
+	Label       // <label>
 	Placement   // $.some_identifier
 	Reference   // @.some_label
 	Directive   // # opt some_option

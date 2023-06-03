@@ -1,6 +1,8 @@
 package token
 
 var Literal = [...]string{
+	empty: "<EMPTY>",
+
 	// Non static or empty literals
 	EOF: "<EOF>",
 
@@ -13,9 +15,9 @@ var Literal = [...]string{
 	BinaryByte:  "<BINBYTE>",
 	String:      "<STRING>",
 	Label:       "<LABEL>",
-	Placement:   "<PLACENT>",
-	Reference:   "<REFRNCE>",
-	Directive:   "<DIRCTVE>",
+	Placement:   "<PLC>",
+	Reference:   "<REF>",
+	Directive:   "<DIR>",
 	LineComment: "<LINECOM>",
 	Illegal:     "<ILLEGAL>",
 }

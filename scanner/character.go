@@ -37,7 +37,7 @@ func binaryDigitsToByte(s string) byte {
 	return b
 }
 
-func hexDigitToVal(d int) uint8 {
+func hexDigitToVal(d byte) uint8 {
 	if d <= '9' {
 		return uint8(d) - '0'
 	}
@@ -47,10 +47,14 @@ func hexDigitToVal(d int) uint8 {
 	return uint8(d) - 'a' + 0x0A
 }
 
-func hexDigitsToByteValue(c, d int) byte {
+func hexDigitsToByteValue(c, d byte) byte {
 	v1 := hexDigitToVal(c)
 	v2 := hexDigitToVal(d)
 	return v1<<4 + v2
+}
+
+func hexByteToValue(s string) byte {
+	return hexDigitsToByteValue(s[0], s[1])
 }
 
 func stringFromByte(b byte) string {

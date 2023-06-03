@@ -26,6 +26,9 @@ func (t *Translator) Translate() (code []byte, err error) {
 
 		switch t.tok.Kind {
 		case token.EOF:
+			if len(t.late) != 0 {
+				return nil, fmt.Errorf("usage of undeclared labels: %d", len(t.late))
+			}
 			return t.code, nil
 		case token.Illegal:
 			return nil, fmt.Errorf("illegal token " + t.tok.Compact())
@@ -40,7 +43,7 @@ func (t *Translator) Translate() (code []byte, err error) {
 			//
 			// in future need to check that colon is placed only after label
 		case token.Label:
-			name := t.tok.Lit
+			name := t.tok.Lit[1 : len(t.tok.Lit)-1]
 			_, ok := t.labels[name]
 			if ok {
 				return nil, fmt.Errorf("redeclaration of label '%s' at %s", name, t.tok.Pos.String())

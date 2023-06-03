@@ -24,7 +24,7 @@ A minimal program would be an empty file and upon translation **hx** will emit a
 
 Translation ignores comments. Thus next listing will be translated to an empty file
 
-```
+```hx
 // Line comments are ignored (start with "//")
 // Multiline are not supported (yet)
 
@@ -35,7 +35,7 @@ Translation ignores comments. Thus next listing will be translated to an empty f
 
 Hex number represents a single byte (number must be 2 digits exactly)
 
-```
+```hx
 // Bytes must be separated with whitespace
 
 01 A3 34
@@ -50,7 +50,7 @@ bc 0a f3
 
 Binary number with exactly 8 digits can be used instead of hex
 
-```
+```hx
 // Usage of binary and hex numbers does not lead to ambiguity
 // because each form uses different number of digits
 
@@ -67,7 +67,7 @@ AF
 
 String inside double quotes emits a sequence of bytes which encode that string in UTF-8
 
-```
+```hx
 // String is denoted by double quotes
 
 "Hello, world!"
@@ -91,7 +91,7 @@ String inside double quotes emits a sequence of bytes which encode that string i
 
 Strings can contain newlines
 
-```
+```hx
 "First line,
  second line
  and third all in one string!"
@@ -99,7 +99,7 @@ Strings can contain newlines
 
 Strings support a small set of C-style escape sequence
 
-```
+```hx
 // \n = newline
 
 "this string ends with newline\n"
@@ -122,7 +122,7 @@ There are different integer representations in memory. By default number literal
 output stream in Little Endian (LE) and produce 8 bytes regardless of literal value. Negative
 literals converted to 2's complement form before translation
 
-```
+```hx
 // Hex literal
 0xA3FF1
 
@@ -142,13 +142,13 @@ literals converted to 2's complement form before translation
 
 ### Labels
 
-Construct `some_label:` marks address in output stream with label. Label itself does not produce any output.
+Construct `<some_label>` marks address in output stream with label. Label itself does not produce any output.
 At any point in program construct `@.some_label` can be used (referenced) to emit an address (offset in output stream) of that label.
 
-Two special labels are available (their explicit usage will result in error):
+Two special labels are available (their explicit declaration will result in error):
 
-* `start` - marks output stream start
-* `end` - marks output stream end
+- `start` - marks output stream start
+- `end` - marks output stream end
 
 Construct `[label_b : label_a]` can be used to emit difference in `label_b` and `label_a` offsets. In other words it emits
 value equal to number of bytes in output stream between `label_a` and `label_b` in that particular order, assuming `label_b` comes after
@@ -156,9 +156,9 @@ value equal to number of bytes in output stream between `label_a` and `label_b` 
 
 Three special forms of length construct can be used:
 
-* `[label:]` - difference between `label` and output stream start
-* `[:label]` - difference betweem output stream end and `label`
-* `[:]` - total number of bytes in output stream
+- `[label:]` - difference between `label` and output stream start
+- `[:label]` - difference betweem output stream end and `label`
+- `[:]` - total number of bytes in output stream
 
 > `[label:]` is not the same as `@.label` because directives could change `@.start` value
 
@@ -170,7 +170,7 @@ Translator directive starts with "#" and continues until line end. Directives ca
 
 Declare constants:
 
-```
+```hx
 # b: byte = 3F
 
 # s: seq = A4 03
@@ -184,7 +184,7 @@ Declare constants:
 # s: str = "Hello, world!"
 ```
 
-```
+```hx
 // Constants must be declared before usage
 # some_string: str = "Hello, world!"
 
@@ -197,7 +197,7 @@ $.some_string
 
 Change translator options:
 
-```
+```hx
 # opt syntax = 0.6.3
 # opt start = 0x005F
 
@@ -213,13 +213,13 @@ Change translator options:
 
 Include other text file as though it was copy-pasted (happens before translation):
 
-```
+```hx
 # include "path/to_other/file.hx"
 ```
 
 Include other binary file in output stream:
 
-```
+```hx
 # before "some_binary_file"
 # insert "binary_file"
 # after "other_binary_file"
@@ -227,7 +227,7 @@ Include other binary file in output stream:
 
 ## Examples
 
-```
+```hx
 // this line and blank lines below will be ignored
 
 
@@ -253,7 +253,7 @@ Include other binary file in output stream:
 
 Text above will be translated to binary with the following sequence of bytes
 
-```
+```hx
 10 01 A3 34 00 20 01 02
 ```
 

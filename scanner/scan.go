@@ -14,23 +14,16 @@ func (s *Scanner) Scan() token.Token {
 		return s.createToken(token.EOF)
 	}
 
-	if isDecimalDigit(s.c) {
-		return s.scanNumber()
-	}
-
 	if isHexadecimalDigit(s.c) {
-		if !isHexadecimalDigit(s.next) {
-			return s.scanLabel()
-		}
 		return s.scanNumber()
-	}
-
-	if isLetterOrUnderscore(s.c) {
-		return s.scanLabel()
 	}
 
 	if s.c == '"' {
 		return s.scanString()
+	}
+
+	if s.c == '<' {
+		return s.scanLabel()
 	}
 
 	if s.c == '/' && s.next == '/' {
@@ -176,14 +169,15 @@ func (s *Scanner) scanHexByte() (tok token.Token) {
 		return
 	}
 
-	tok.Lit = s.collect()
-	if len(tok.Lit) != 2 {
+	lit := s.collect()
+	if len(lit) != 2 {
+		tok.Lit = lit
 		tok.Kind = token.Illegal
 		return
 	}
 
 	tok.Kind = token.HexByte
-	tok.Val = uint64(hexDigitsToByteValue(int(tok.Lit[0]), int(tok.Lit[1])))
+	tok.Val = uint64(hexByteToValue(lit))
 	return
 }
 
@@ -213,7 +207,29 @@ func (s *Scanner) scanBinaryByteAtPos(pos token.Pos) (tok token.Token) {
 
 func (s *Scanner) scanLabel() (tok token.Token) {
 	tok.Pos = s.pos
+	s.store() // consume <
+	if !isLetterOrUnderscore(s.c) {
+		s.storeWord()
+		if s.c == '>' {
+			s.store()
+		}
+		tok.Lit = s.collect()
+		tok.Kind = token.Illegal
+		return
+	}
+
 	s.storeWord()
+	if s.c == '>' {
+		s.store()
+		tok.Lit = s.collect()
+		if len(tok.Lit) < 3 {
+			tok.Kind = token.Illegal
+			return
+		}
+		tok.Kind = token.Label
+		return
+	}
+
 	tok.Kind = token.Label
 	tok.Lit = s.collect()
 	return
@@ -237,10 +253,10 @@ func (s *Scanner) scanNumber() (tok token.Token) {
 		return
 	}
 	if isWhitespace(s.next) || s.next == eof {
-		tok.Val = uint64(hexDigitsToByteValue(prev, s.c))
+		tok.Val = uint64(hexDigitsToByteValue(byte(prev), byte(s.c)))
 		s.store()
 		tok.Kind = token.HexByte
-		tok.Lit = s.collect()
+		_ = s.collect()
 		tok.Pos = pos
 		return
 	}
