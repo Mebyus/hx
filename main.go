@@ -6,6 +6,8 @@ import (
 	"os"
 	"strings"
 
+	"codeberg.org/mebyus/hx/lexer"
+	"codeberg.org/mebyus/hx/list"
 	"codeberg.org/mebyus/hx/reverse"
 	"codeberg.org/mebyus/hx/translator"
 )
@@ -31,7 +33,9 @@ func transformFilename(name string) string {
 
 func main() {
 	var isReverseCommand bool
+	var isListCommand bool
 	flag.BoolVar(&isReverseCommand, "r", false, "transform binary file to text file in hx format")
+	flag.BoolVar(&isListCommand, "l", false, "list tokens in text file")
 	flag.Parse()
 
 	args := flag.Args()
@@ -48,6 +52,18 @@ func main() {
 
 		outputFilename := filename + ext
 		err = os.WriteFile(outputFilename, text, 0o664)
+		if err != nil {
+			fatal(err)
+		}
+		return
+	}
+
+	if isListCommand {
+		s, err := lexer.FromFile(filename)
+		if err != nil {
+			fatal(err)
+		}
+		err = list.List(os.Stdout, s)
 		if err != nil {
 			fatal(err)
 		}

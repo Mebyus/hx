@@ -11,13 +11,13 @@ var Literal = [...]string{
 	LeftBrace:  "{",
 	RightBrace: "}",
 
-	HexByte:     "<HEXBYTE>",
-	BinaryByte:  "<BINBYTE>",
-	String:      "<STRING>",
-	Label:       "<LABEL>",
+	HexByte:     "<HEX>",
+	BinaryByte:  "<BIN>",
+	String:      "<STR>",
+	Label:       "<LBL>",
 	Placement:   "<PLC>",
 	Reference:   "<REF>",
 	Directive:   "<DIR>",
-	LineComment: "<LINECOM>",
+	LineComment: "<COM>",
 	Illegal:     "<ILLEGAL>",
 }
