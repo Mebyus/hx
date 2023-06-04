@@ -87,3 +87,40 @@ func (p *Parrot) Lex() token.Token {
 	p.i++
 	return tok
 }
+
+// Eraser wraps a Stream removing position information from tokens
+//
+// Commonly used for testing
+type Eraser struct {
+	s Stream
+}
+
+func NoPos(s Stream) Eraser {
+	return Eraser{s: s}
+}
+
+func (e Eraser) Lex() token.Token {
+	tok := e.s.Lex()
+	tok.ErasePos()
+	return tok
+}
+
+// Quiet wraps a Stream removing tokens with comments
+//
+// Commonly used for testing
+type Quiet struct {
+	s Stream
+}
+
+func NoComments(s Stream) Quiet {
+	return Quiet{s: s}
+}
+
+func (q Quiet) Lex() token.Token {
+	for {
+		tok := q.s.Lex()
+		if tok.Kind != token.LineComment {
+			return tok
+		}
+	}
+}

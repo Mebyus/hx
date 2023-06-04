@@ -8,7 +8,7 @@ type Token struct {
 	// Not empty only for tokens which can have
 	// arbitrary literal
 	//
-	// Examples: numbers or strings
+	// Examples: labels or strings
 	Lit string
 
 	// Meaning depends on Token.Kind
@@ -31,4 +31,8 @@ func (tok *Token) Compact() string {
 		return fmt.Sprintf("%s  %s", tok.Pos.String(), Literal[tok.Kind])
 	}
 	return fmt.Sprintf("%s  %s  %s", tok.Pos.String(), Literal[tok.Kind], tok.Lit)
+}
+
+func (tok *Token) ErasePos() {
+	tok.Pos = Pos{}
 }
