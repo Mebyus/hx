@@ -22,7 +22,7 @@ func TranslateFile(filename string) (code []byte, err error) {
 
 func (t *Translator) Translate() (code []byte, err error) {
 	for {
-		t.tok = t.sc.Scan()
+		t.tok = t.s.Lex()
 
 		switch t.tok.Kind {
 		case token.EOF:

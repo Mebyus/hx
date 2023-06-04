@@ -1,4 +1,4 @@
-package scanner
+package lexer
 
 func isAlphanum(c int) bool {
 	return isLetterOrUnderscore(c) || isDecimalDigit(c)

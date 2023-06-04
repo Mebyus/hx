@@ -4,13 +4,9 @@ import (
 	"io"
 	"os"
 
-	"codeberg.org/mebyus/hx/scanner"
+	"codeberg.org/mebyus/hx/lexer"
 	"codeberg.org/mebyus/hx/token"
 )
-
-type Scanner interface {
-	Scan() token.Token
-}
 
 type Translator struct {
 	code []byte
@@ -30,12 +26,12 @@ type Translator struct {
 	lbuf [8]byte
 
 	tok token.Token
-	sc  Scanner
+	s   lexer.Stream
 }
 
-func FromScanner(sc Scanner) (t *Translator) {
+func FromStream(s lexer.Stream) (t *Translator) {
 	return &Translator{
-		sc:     sc,
+		s:      s,
 		cvs:    make(map[string]any),
 		labels: make(map[string]uint64),
 		late:   make(map[string][]uint64),
@@ -43,7 +39,7 @@ func FromScanner(sc Scanner) (t *Translator) {
 }
 
 func FromBytes(b []byte) (t *Translator) {
-	t = FromScanner(scanner.FromBytes(b))
+	t = FromStream(lexer.FromBytes(b))
 	return
 }
 

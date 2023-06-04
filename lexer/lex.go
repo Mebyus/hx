@@ -1,10 +1,10 @@
-package scanner
+package lexer
 
 import (
 	"codeberg.org/mebyus/hx/token"
 )
 
-func (s *Scanner) Scan() token.Token {
+func (s *Lexer) Lex() token.Token {
 	if s.c == eof {
 		return s.createToken(token.EOF)
 	}
@@ -15,44 +15,44 @@ func (s *Scanner) Scan() token.Token {
 	}
 
 	if isHexadecimalDigit(s.c) {
-		return s.scanNumber()
+		return s.lexNumber()
 	}
 
 	if s.c == '"' {
-		return s.scanString()
+		return s.lexString()
 	}
 
 	if s.c == '<' {
-		return s.scanLabel()
+		return s.lexLabel()
 	}
 
 	if s.c == '/' && s.next == '/' {
-		return s.scanLineComment()
+		return s.lexLineComment()
 	}
 
 	if s.c == '#' {
-		return s.scanDirective()
+		return s.lexDirective()
 	}
 
 	if s.c == '$' && s.next == '.' {
-		return s.scanPlacement()
+		return s.lexPlacement()
 	}
 
 	if s.c == '@' && s.next == '.' {
-		return s.scanReference()
+		return s.lexReference()
 	}
 
-	return s.scanOther()
+	return s.lexOther()
 }
 
-func (s *Scanner) createToken(kind token.Kind) token.Token {
+func (s *Lexer) createToken(kind token.Kind) token.Token {
 	return token.Token{
 		Kind: kind,
 		Pos:  s.pos,
 	}
 }
 
-func (s *Scanner) scanWordWithPrefix(kind token.Kind) (tok token.Token) {
+func (s *Lexer) lexWordWithPrefix(kind token.Kind) (tok token.Token) {
 	tok.Pos = s.pos
 	s.store()
 	s.store()
@@ -69,15 +69,15 @@ func (s *Scanner) scanWordWithPrefix(kind token.Kind) (tok token.Token) {
 	return
 }
 
-func (s *Scanner) scanPlacement() (tok token.Token) {
-	return s.scanWordWithPrefix(token.Placement)
+func (s *Lexer) lexPlacement() (tok token.Token) {
+	return s.lexWordWithPrefix(token.Placement)
 }
 
-func (s *Scanner) scanReference() (tok token.Token) {
-	return s.scanWordWithPrefix(token.Reference)
+func (s *Lexer) lexReference() (tok token.Token) {
+	return s.lexWordWithPrefix(token.Reference)
 }
 
-func (s *Scanner) scanDirective() (tok token.Token) {
+func (s *Lexer) lexDirective() (tok token.Token) {
 	tok.Kind = token.Directive
 	tok.Pos = s.pos
 
@@ -89,7 +89,7 @@ func (s *Scanner) scanDirective() (tok token.Token) {
 	return
 }
 
-func (s *Scanner) scanString() (tok token.Token) {
+func (s *Lexer) lexString() (tok token.Token) {
 	tok.Pos = s.pos
 	s.store() // consume "
 
@@ -136,26 +136,7 @@ func (s *Scanner) scanString() (tok token.Token) {
 	return
 }
 
-func (s *Scanner) scanHexadecimalNumber() (tok token.Token) {
-	tok.Pos = s.pos
-
-	for s.c != eof && isHexadecimalDigit(s.c) {
-		s.store()
-	}
-
-	if isAlphanum(s.c) {
-		s.storeWord()
-		tok.Kind = token.Illegal
-		tok.Lit = s.collect()
-		return
-	}
-
-	tok.Kind = token.HexByte
-	tok.Lit = s.collect()
-	return
-}
-
-func (s *Scanner) scanHexByte() (tok token.Token) {
+func (s *Lexer) lexHexByte() (tok token.Token) {
 	tok.Pos = s.pos
 
 	for s.c != eof && isHexadecimalDigit(s.c) {
@@ -181,7 +162,7 @@ func (s *Scanner) scanHexByte() (tok token.Token) {
 	return
 }
 
-func (s *Scanner) scanBinaryByteAtPos(pos token.Pos) (tok token.Token) {
+func (s *Lexer) lexBinaryByteAtPos(pos token.Pos) (tok token.Token) {
 	tok.Pos = pos
 	for s.c != eof && isBinaryDigit(s.c) {
 		s.store()
@@ -205,7 +186,7 @@ func (s *Scanner) scanBinaryByteAtPos(pos token.Pos) (tok token.Token) {
 	return
 }
 
-func (s *Scanner) scanLabel() (tok token.Token) {
+func (s *Lexer) lexLabel() (tok token.Token) {
 	tok.Pos = s.pos
 	s.store() // consume <
 	if !isLetterOrUnderscore(s.c) {
@@ -235,13 +216,13 @@ func (s *Scanner) scanLabel() (tok token.Token) {
 	return
 }
 
-func (s *Scanner) scanNumber() (tok token.Token) {
+func (s *Lexer) lexNumber() (tok token.Token) {
 	if !isBinaryDigit(s.c) {
-		tok = s.scanHexByte()
+		tok = s.lexHexByte()
 		return
 	}
 	if !isBinaryDigit(s.next) {
-		tok = s.scanHexByte()
+		tok = s.lexHexByte()
 		return
 	}
 
@@ -249,7 +230,7 @@ func (s *Scanner) scanNumber() (tok token.Token) {
 	prev := s.c
 	s.store()
 	if isBinaryDigit(s.next) {
-		tok = s.scanBinaryByteAtPos(pos)
+		tok = s.lexBinaryByteAtPos(pos)
 		return
 	}
 	if isWhitespace(s.next) || s.next == eof {
@@ -260,10 +241,10 @@ func (s *Scanner) scanNumber() (tok token.Token) {
 		tok.Pos = pos
 		return
 	}
-	return s.scanIllegalWordAtPos(pos)
+	return s.lexIllegalWordAtPos(pos)
 }
 
-func (s *Scanner) scanLineComment() (tok token.Token) {
+func (s *Lexer) lexLineComment() (tok token.Token) {
 	tok.Kind = token.LineComment
 	tok.Pos = s.pos
 
@@ -275,21 +256,14 @@ func (s *Scanner) scanLineComment() (tok token.Token) {
 	return
 }
 
-func (s *Scanner) scanIllegalByteToken() token.Token {
+func (s *Lexer) lexIllegalByteToken() token.Token {
 	tok := s.createToken(token.Illegal)
 	tok.Lit = stringFromByte(byte(s.c))
 	s.advance()
 	return tok
 }
 
-func (s *Scanner) scanIllegalWord() (tok token.Token) {
-	tok = s.createToken(token.Illegal)
-	s.storeWord()
-	tok.Lit = s.collect()
-	return
-}
-
-func (s *Scanner) scanIllegalWordAtPos(pos token.Pos) (tok token.Token) {
+func (s *Lexer) lexIllegalWordAtPos(pos token.Pos) (tok token.Token) {
 	tok = s.createToken(token.Illegal)
 	tok.Pos = pos
 	s.storeWord()
@@ -297,23 +271,23 @@ func (s *Scanner) scanIllegalWordAtPos(pos token.Pos) (tok token.Token) {
 	return
 }
 
-func (s *Scanner) scanOneByteToken(kind token.Kind) token.Token {
+func (s *Lexer) lexOneByteToken(kind token.Kind) token.Token {
 	tok := s.createToken(kind)
 	s.advance()
 	return tok
 }
 
-func (s *Scanner) scanOther() token.Token {
+func (s *Lexer) lexOther() token.Token {
 	switch s.c {
 	case ':':
-		return s.scanOneByteToken(token.Colon)
+		return s.lexOneByteToken(token.Colon)
 	case '-':
-		return s.scanOneByteToken(token.Minus)
+		return s.lexOneByteToken(token.Minus)
 	case '{':
-		return s.scanOneByteToken(token.LeftBrace)
+		return s.lexOneByteToken(token.LeftBrace)
 	case '}':
-		return s.scanOneByteToken(token.RightBrace)
+		return s.lexOneByteToken(token.RightBrace)
 	default:
-		return s.scanIllegalByteToken()
+		return s.lexIllegalByteToken()
 	}
 }

@@ -1,4 +1,4 @@
-package scanner
+package lexer
 
 import (
 	"io"
@@ -7,7 +7,11 @@ import (
 	"codeberg.org/mebyus/hx/token"
 )
 
-type Scanner struct {
+type Stream interface {
+	Lex() token.Token
+}
+
+type Lexer struct {
 	// charcode at current Scanner position
 	c int
 
@@ -23,22 +27,24 @@ type Scanner struct {
 	// source text which is scanned by the Scanner
 	src []byte
 
-	// Scanner position inside source text
+	// Lexer position inside source text
 	pos token.Pos
 }
 
-func FromBytes(b []byte) (s *Scanner) {
-	s = &Scanner{src: b}
+func FromBytes(b []byte) (s *Lexer) {
+	s = &Lexer{src: b}
 
 	// init Scanner's current and next runes
 	for i := 0; i < prefetch; i++ {
 		s.advance()
 	}
+
+	// reset scanner position
 	s.pos = token.Pos{}
 	return s
 }
 
-func FromFile(filename string) (s *Scanner, err error) {
+func FromFile(filename string) (s *Lexer, err error) {
 	src, err := os.ReadFile(filename)
 	if err != nil {
 		return
@@ -46,7 +52,7 @@ func FromFile(filename string) (s *Scanner, err error) {
 	return FromBytes(src), nil
 }
 
-func FromReader(r io.Reader) (s *Scanner, err error) {
+func FromReader(r io.Reader) (s *Lexer, err error) {
 	src, err := io.ReadAll(r)
 	if err != nil {
 		return

@@ -4,8 +4,13 @@ import "strconv"
 
 // Pos represents a token position in source code
 type Pos struct {
+	// In bytes, zero based
+	Offset int
+
 	Line int
-	Col  int
+
+	// In characters (code points)
+	Col int
 }
 
 func (p *Pos) NextLine() {

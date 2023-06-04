@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"codeberg.org/mebyus/hx/scanner"
+	"codeberg.org/mebyus/hx/lexer"
 	"codeberg.org/mebyus/hx/token"
 )
 
@@ -23,7 +23,7 @@ func TestTranslate(t *testing.T) {
 	}
 	for _, name := range names {
 		path := filepath.Join(testDataDir, name)
-		sc, err := scanner.FromFile(path)
+		sc, err := lexer.FromFile(path)
 		if err != nil {
 			t.Errorf("[ %s ] read test file: %v", name, err)
 			continue
@@ -34,7 +34,7 @@ func TestTranslate(t *testing.T) {
 			continue
 		}
 		s := newTokenScanner(tokens)
-		tr := FromScanner(s)
+		tr := FromStream(s)
 		gotCode, err := tr.Translate()
 		if err != nil {
 			t.Errorf("[ %s ] failed to translate test data: %v", name, err)
@@ -67,9 +67,9 @@ func compareTranslatedCode(got, want []byte) error {
 	return nil
 }
 
-func scanUntilTestResultLiteral(sc Scanner) (tokens []token.Token, reachedEOF bool) {
+func scanUntilTestResultLiteral(lx lexer.Stream) (tokens []token.Token, reachedEOF bool) {
 	for {
-		tok := sc.Scan()
+		tok := lx.Lex()
 		switch tok.Kind {
 		case token.LineComment:
 			lit := strings.TrimSpace(strings.TrimPrefix(tok.Lit, "//"))
@@ -111,7 +111,7 @@ func newTokenScanner(tokens []token.Token) *tokenScanner {
 	}
 }
 
-func (s *tokenScanner) Scan() token.Token {
+func (s *tokenScanner) Lex() token.Token {
 	if s.i >= len(s.tokens) {
 		tok := token.Token{Kind: token.EOF}
 		if len(s.tokens) == 0 {
@@ -127,9 +127,9 @@ func (s *tokenScanner) Scan() token.Token {
 	return tok
 }
 
-func translateScannerWithBytes(sc Scanner) (code []byte, err error) {
+func translateScannerWithBytes(s lexer.Stream) (code []byte, err error) {
 	for {
-		tok := sc.Scan()
+		tok := s.Lex()
 		switch tok.Kind {
 		case token.EOF:
 			return code, nil
