@@ -59,3 +59,31 @@ func FromReader(r io.Reader) (s *Lexer, err error) {
 	}
 	return FromBytes(src), nil
 }
+
+// Parrot implements Stream by yielding tokens from supplied list
+type Parrot struct {
+	toks []token.Token
+	i    int
+}
+
+func FromTokens(toks []token.Token) *Parrot {
+	return &Parrot{
+		toks: toks,
+	}
+}
+
+func (p *Parrot) Lex() token.Token {
+	if p.i >= len(p.toks) {
+		tok := token.Token{Kind: token.EOF}
+		if len(p.toks) == 0 {
+			return tok
+		}
+		pos := p.toks[len(p.toks)-1].Pos
+		pos.NextLine()
+		tok.Pos = pos
+		return tok
+	}
+	tok := p.toks[p.i]
+	p.i++
+	return tok
+}

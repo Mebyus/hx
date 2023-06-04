@@ -23,32 +23,32 @@ func TestTranslate(t *testing.T) {
 	}
 	for _, name := range names {
 		path := filepath.Join(testDataDir, name)
-		sc, err := lexer.FromFile(path)
+		lx, err := lexer.FromFile(path)
 		if err != nil {
 			t.Errorf("[ %s ] read test file: %v", name, err)
 			continue
 		}
-		tokens, reachedEOF := scanUntilTestResultLiteral(sc)
+		tokens, reachedEOF := scanUntilTestResultLiteral(lx)
 		if reachedEOF {
 			t.Errorf("[ %s ] test file doesn't have result section", name)
 			continue
 		}
-		s := newTokenScanner(tokens)
+		s := lexer.FromTokens(tokens)
 		tr := FromStream(s)
 		gotCode, err := tr.Translate()
 		if err != nil {
 			t.Errorf("[ %s ] failed to translate test data: %v", name, err)
 			continue
 		}
-		wantCode, err := translateScannerWithBytes(sc)
+		wantCode, err := translateHexByteStream(lx)
 		if err != nil {
 			t.Errorf("[ %s ] failed to translate test result data: %v", name, err)
 			continue
 		}
 		err = compareTranslatedCode(gotCode, wantCode)
 		if err != nil {
-			t.Errorf("[ %s ] got  %X", name, gotCode)
-			t.Errorf("[ %s ] want %X", name, wantCode)
+			t.Errorf("[ %s ] got  % X", name, gotCode)
+			t.Errorf("[ %s ] want % X", name, wantCode)
 			t.Errorf("[ %s ] test results are not equal: %v", name, err)
 			continue
 		}
@@ -100,34 +100,7 @@ func discoverTestFiles(dir string) (names []string, err error) {
 	return
 }
 
-type tokenScanner struct {
-	tokens []token.Token
-	i      int
-}
-
-func newTokenScanner(tokens []token.Token) *tokenScanner {
-	return &tokenScanner{
-		tokens: tokens,
-	}
-}
-
-func (s *tokenScanner) Lex() token.Token {
-	if s.i >= len(s.tokens) {
-		tok := token.Token{Kind: token.EOF}
-		if len(s.tokens) == 0 {
-			return tok
-		}
-		pos := s.tokens[len(s.tokens)-1].Pos
-		pos.NextLine()
-		tok.Pos = pos
-		return tok
-	}
-	tok := s.tokens[s.i]
-	s.i++
-	return tok
-}
-
-func translateScannerWithBytes(s lexer.Stream) (code []byte, err error) {
+func translateHexByteStream(s lexer.Stream) (code []byte, err error) {
 	for {
 		tok := s.Lex()
 		switch tok.Kind {
